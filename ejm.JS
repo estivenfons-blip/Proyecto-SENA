@@ -1,10 +1,15 @@
 const express = require('express')
 const app = express()
 const port = 3000
-//MySQL2
-const mysql = require('mysql2/promise');
 const cors = require('cors')
 const session = require('express-session')
+const md5 = require('md5');
+const bcrypt = require('bcrypt');
+const login=require('./login');
+const registro=require('./registro');
+const {obtenerUsuarios, eliminarUsuarios}=require('./usuarios');
+const validar=require('./validar');
+const saltRounds = 10;
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -14,49 +19,24 @@ app.use(session({
   secret: 'yosoloqueriaterminarunañobien777'
 }))
 
-// Conceción con Database
-const connection = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  database: 'login',
-});
-
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
 //Para Ingresar
-app.get('/login', async (req, res) => {
-  const datos = req.query;
-  //VERIFIACIÓN DE USUSARIOS
-  try {
-    const [results, fields] = await connection.query(
-      "SELECT * FROM `usuarios` WHERE `usuario` = ? AND `clave` = ?",
-      [datos.usuario, datos.clave]
-    );
-    if (results.length > 0) {
-      req.session.usuario = datos.usuario;
-      res.status(200).send("Inicio de sesion correcto")
-    } else {
-      res.status(401).send("Datos Incorrectos")
-    }
-
-    console.log(results);
-    console.log(fields);
-  } catch (err) {
-    console.log(err);
-  }
-})
-
+app.get('/login', login)
 
 //Para Verificar
-app.get('/validar', (req, res) => {
-  if (req.session.usuario) {
-    res.status(200).send('Sesion Validada')
-  } else {
-    res.status(401).send('No Autorizado')
-  }
-})
+app.get('/validar', validar)
+
+//Para Registrar
+app.get('/registro', registro)
+
+//Para Lista Usuarios
+app.get('/usuarios', obtenerUsuarios)
+
+//Para Eliminar Usuarios
+app.delete('/usuarios', eliminarUsuarios)
 
 //Cargo
 app.get('/position', (req, res) => {
