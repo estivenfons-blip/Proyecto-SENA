@@ -9,6 +9,8 @@ const login=require('./login');
 const registro=require('./registro');
 const {obtenerUsuarios, eliminarUsuarios}=require('./usuarios');
 const validar=require('./validar');
+// control inventario
+const {obtenerInventario, registrarProducto, eliminarProducto, actualizarStock}=require('./inventario');
 const saltRounds = 10;
 
 app.use(cors({
@@ -23,25 +25,20 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-//Para Ingresar
+//Autentificación
 app.get('/login', login)
-
-//Para Verificar
 app.get('/validar', validar)
-
-//Para Registrar
 app.get('/registro', registro)
 
-//Para Lista Usuarios
+//Usuarios
 app.get('/usuarios', obtenerUsuarios)
-
-//Para Eliminar Usuarios
 app.delete('/usuarios', eliminarUsuarios)
 
-//Cargo
-app.get('/position', (req, res) => {
-  res.send('Hello World!')
-})
+//Inventario
+app.get('/inventario', obtenerInventario)// Listar todos los productos
+app.post('/inventario', registrarProducto)// Registrar producto nuevo
+app.delete('/inventario', eliminarProducto) // Eliminar producto por ID
+app.patch('/inventario/stock', actualizarStock)// Actualizar stock por ID
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
